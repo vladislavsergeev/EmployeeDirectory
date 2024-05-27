@@ -1,0 +1,55 @@
+﻿@model X.PagedList.IPagedList<EmployeeDirectory.Models.Employee>
+@using X.PagedList.Mvc.Core
+
+<div class="table-responsive">
+    <table class="table table-hover shadow-sm">
+        <thead class="thead-light">
+            <tr>
+                <th scope="col" style="width: 30%;">Full Name</th>
+                <th scope="col" style="width: 25%;">Department</th>
+                <th scope="col" style="width: 20%;">Phone Number</th>
+                <th scope="col" style="width: 15%;">Photo</th>
+                <th scope="col" style="width: 10%;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (!Model.Any())
+            {
+                <tr>
+                    <td colspan="5" class="text-center">No employees found :(</td>
+                </tr>
+            }
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => item.FullName)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Department)</td>
+                    <td>@Html.DisplayFor(modelItem => item.PhoneNumber)</td>
+                    <td>
+                        @if (!string.IsNullOrEmpty(item.PhotoPath))
+                        {
+                            <img src="@item.PhotoPath" class="img-fluid rounded-circle" style="max-width: 100px; max-height: 100px;" alt="Employee Image" />
+                        }
+                    </td>
+                    <td>
+                        @foreach (var action in new[] { "Edit", "Details", "Delete" })
+                        {
+                            <a asp-action="@action" asp-route-id="@item.Id" class="btn btn-sm @(action == "Edit" ? "btn-info" : action == "Details" ? "btn-primary" : "btn-danger")">@action</a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    @Html.PagedListPager(Model, page => Url.Action("Index", new { page, searchString = ViewData["CurrentFilter"] }),
+            new PagedListRenderOptions
+    {
+        LiElementClasses = new string[] { "page-item" },
+        PageClasses = new string[] { "page-link" },
+        DisplayEllipsesWhenNotShowingAllPageNumbers = true,
+        EllipsesFormat = "&#8230;",
+        DisplayLinkToFirstPage = PagedListDisplayMode.Always,
+        DisplayLinkToLastPage = PagedListDisplayMode.Always
+    })
+</div>

@@ -1,0 +1,71 @@
+﻿@model X.PagedList.IPagedList<EmployeeDirectory.Models.Employee>
+@using X.PagedList.Mvc.Core
+
+@{
+    ViewData["Title"] = "Employee Directory";
+}
+
+<div class="container mt-4">
+    <h1 class="mb-3">@ViewData["Title"]</h1>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <a asp-action="create" class="btn btn-primary">Add New</a>
+        <input type="search" id="searchInput" placeholder="Search by name or phone..." class="form-control" style="width: 100%; max-width: 300px;" value="@ViewData["CurrentFilter"]">
+    </div>
+
+    <div id="employeesTableContainer">
+        @await Html.PartialAsync("_EmployeesTable", Model)
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            var searchTimeout;
+
+            function bindSearch() {
+                $("#searchInput").on("input", function () {
+                    var searchTerm = $(this).val().trim();
+
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(function () {
+                        updateEmployeeTable(searchTerm, 1);
+                    }, 200);
+                });
+            }
+
+            function updateEmployeeTable(searchTerm, pageNumber) {
+                $.get('@Url.Action("Index", "Employees")', { searchString: searchTerm, page: pageNumber })
+                    .done(function (result) {
+                        $('#employeesTableContainer').html(result);
+                        bindPaginationLinks(searchTerm);
+                    })
+                    .fail(function () {
+                        console.log("Error loading data.");
+                    });
+            }
+
+            function bindPaginationLinks(searchTerm) {
+                $('#employeesTableContainer .pagination a').on('click', function (e) {
+                    e.preventDefault();
+                    var url = $(this).attr('href');
+                    if (url) {
+                        var pageNumber = getUrlParameter(url, 'page');
+                        updateEmployeeTable(searchTerm, pageNumber);
+                    }
+                });
+            }
+
+            function getUrlParameter(url, name) {
+                name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+                var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+                var results = regex.exec(url);
+                return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+            }
+
+            bindSearch();
+            bindPaginationLinks('@ViewData["CurrentFilter"]' || '');
+        });
+    </script>
+}
