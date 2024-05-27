@@ -1,3 +1,7 @@
+## Screenshots
+
+Below are some key screenshots from the application, showing different functionalities:
+
 ### Home Page
 
 Here you can see the home page where all employees are listed with options to edit, delete, or add new ones.
